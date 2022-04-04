@@ -6,7 +6,10 @@
   - shallow 是否是 shallow
 - 主要逻辑：
   - 返回与 proxy 格式相同的 get 函数（即 get 操作器）
-  - 根据 key、receiver 判断，被用于 isReactive、isReadonly、isRaw
+  - 根据 key、receiver 判断，被用于 isReactive、isReadonly、isRaw 函数
+    - 若 key === ReactiveFlags.IS_REACTIVE，返回 !isReadonly
+    - 若 key === key === ReactiveFlags.IS_READONLY，返回 isReadonly
+    - 若 key === ReactiveFlags.RAW 并且存在某个缓存中，即存在响应式对象，直接返回 target
   - 使用 Reflect.get 获取值
   - 调用 track 函数进行依赖收集，注意 readonly 不需要
   - shallow 直接返回结果
