@@ -11,7 +11,7 @@ class ActiviteEffect {
 
   run() {
     activiteEffect = this;
-    this._fn();
+    return this._fn();
   }
 }
 
@@ -19,6 +19,8 @@ class ActiviteEffect {
 export function effect(fn: () => any) {
   const activiteFn = new ActiviteEffect(fn);
   activiteFn.run();
+
+  return activiteFn.run.bind(activiteFn);
 }
 
 type DepMap = Map<keyof any, Set<any>>;
