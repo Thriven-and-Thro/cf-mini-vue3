@@ -33,10 +33,14 @@ describe("effect", () => {
     expect(r).toBe("foo");
   });
 
+  // 1. effect 可传入第二个参数对象，其中有属性函数 scheduler
+  // 2. 触发 effect 会执行参数1的函数
+  // 3. 之后触发依赖则不会执行参数1的函数而是执行 scheduler
+  // 4. 但是执行 effect 的返回值时还是执行参数1的函数
   it("scheduler", () => {
     let dummy;
     let run;
-    let obj = reactive({ foo: 0 });
+    let obj = reactive({ foo: 1 });
     const scheduler = jest.fn(() => {
       run = runner;
     });

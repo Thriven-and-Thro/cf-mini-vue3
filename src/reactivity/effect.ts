@@ -5,7 +5,7 @@ let activiteEffect: ActiviteEffect;
 class ActiviteEffect {
   _fn: () => any;
 
-  constructor(fn: () => any) {
+  constructor(fn: () => any, public scheduler: () => any) {
     this._fn = fn;
   }
 
@@ -16,8 +16,9 @@ class ActiviteEffect {
 }
 
 // 执行函数
-export function effect(fn: () => any, option = {}) {
-  const activiteFn = new ActiviteEffect(fn);
+export function effect(fn: () => any, option: any = {}) {
+  const { scheduler } = option;
+  const activiteFn = new ActiviteEffect(fn, scheduler);
   activiteFn.run();
 
   return activiteFn.run.bind(activiteFn);
