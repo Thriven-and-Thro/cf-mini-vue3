@@ -16,7 +16,7 @@ class ActiviteEffect {
 }
 
 // 执行函数
-export function effect(fn: () => any) {
+export function effect(fn: () => any, option = {}) {
   const activiteFn = new ActiviteEffect(fn);
   activiteFn.run();
 
@@ -52,7 +52,11 @@ export function trigger(target: Object, key: keyof any) {
 
   if (effectSet) {
     for (const effect of effectSet) {
-      effect.run();
+      if (effect.scheduler) {
+        effect.scheduler();
+      } else {
+        effect.run();
+      }
     }
   }
 }
