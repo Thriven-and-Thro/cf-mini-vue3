@@ -7,7 +7,7 @@ describe("effect", () => {
       age: 1,
     });
 
-    let nextAge;
+    let nextAge: number;
     effect(() => {
       nextAge = user.age + 1;
     });
