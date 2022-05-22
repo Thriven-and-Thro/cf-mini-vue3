@@ -1,5 +1,5 @@
 import { reactive } from "../reactive";
-import { effect } from "../effect";
+import { effect, stop } from "../effect";
 
 describe("effect", () => {
   it("happy path", () => {
@@ -7,7 +7,7 @@ describe("effect", () => {
       age: 1,
     });
 
-    let nextAge: number;
+    let nextAge;
     effect(() => {
       nextAge = user.age + 1;
     });
@@ -58,5 +58,42 @@ describe("effect", () => {
     expect(dummy).toBe(1);
     run();
     expect(dummy).toBe(2);
+  });
+
+  // 1. 调用后清除该函数的响应式对象对其的依赖
+  it("stop", () => {
+    let dummy;
+    const user = reactive({
+      age: 0,
+    });
+    const runner = effect(() => {
+      dummy = user.age;
+    });
+    expect(dummy).toBe(0);
+    user.age = 1;
+    expect(dummy).toBe(1);
+    stop(runner);
+    user.age = 2;
+    expect(dummy).toBe(1);
+    runner();
+    expect(dummy).toBe(2);
+  });
+
+  it("onStop", () => {
+    let dummy;
+    const user = reactive({
+      age: 0,
+    });
+    const onStop = jest.fn();
+    const runner = effect(
+      () => {
+        dummy = user.age;
+      },
+      {
+        onStop,
+      }
+    );
+    stop(runner);
+    expect(onStop).toHaveBeenCalledTimes(1);
   });
 });
