@@ -79,6 +79,7 @@ describe("effect", () => {
     expect(dummy).toBe(2);
   });
 
+  // 2. 调用stop后会触发传入的onStop函数
   it("onStop", () => {
     let dummy;
     const user = reactive({
