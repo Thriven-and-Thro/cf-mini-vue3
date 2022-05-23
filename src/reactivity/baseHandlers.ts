@@ -1,4 +1,5 @@
 import { track, trigger } from "./effect";
+import { ReactiveFlag } from "./reactive";
 
 // 优化：减少调用次数
 const get = createGetter();
@@ -6,11 +7,16 @@ const set = createSetter();
 const readonlyGet = createGetter(true);
 
 // 抽取：proxy的get操作
-function createGetter(isReadobnnly = false) {
+function createGetter(isReadonly = false) {
   return (target, key, receiver) => {
+    if (key === ReactiveFlag.IS_REACTIVE) {
+      return !isReadonly;
+    } else if (key === ReactiveFlag.IS_READONLY) {
+      return isReadonly;
+    }
     const res = Reflect.get(target, key, receiver);
     // 依赖收集
-    if (!isReadobnnly) track(target, key);
+    if (!isReadonly) track(target, key);
     return res;
   };
 }

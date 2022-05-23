@@ -1,5 +1,4 @@
-import { effect } from "../effect";
-import { readonly } from "../reactive";
+import { isReadonly, readonly } from "../reactive";
 
 describe("readonly", () => {
   // 1. 不可写
@@ -13,5 +12,12 @@ describe("readonly", () => {
     console.warn = jest.fn();
     userProxy.age = 1;
     expect(console.warn).toBeCalled();
+  });
+
+  it("isReadonly", () => {
+    const user = { age: 0 };
+    const userProxy = readonly({ age: 0 });
+    expect(isReadonly(userProxy)).toBe(true);
+    expect(isReadonly(user)).toBe(false);
   });
 });
