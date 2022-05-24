@@ -103,13 +103,16 @@ describe("effect", () => {
     const user = reactive({
       age: 0,
     });
+    // effect() -> shouldTrack=true -> fn() -> get -> track -> shouldTrack=false
     const runner = effect(() => {
       dummy = user.age;
     });
-    stop(runner);
     // user.age = user.age+1
     // get->set：所以会再次收集一次依赖
+    // get -> track -> shouldTrack -> return
     user.age++;
-    expect(dummy).toBe(0);
+    stop(runner);
+    user.age++;
+    expect(dummy).toBe(1);
   });
 });

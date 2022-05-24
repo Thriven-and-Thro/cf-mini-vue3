@@ -2,6 +2,7 @@ import { extend } from "../shared";
 
 // 全局变量保存执行函数
 let activiteEffect: ActiviteEffect;
+// 防止重复get进行依赖收集
 let shouldTrack: boolean = true;
 
 // 封装执行函数
@@ -32,6 +33,7 @@ class ActiviteEffect {
     activiteEffect = this;
     const result = this._fn();
 
+    // 上锁
     shouldTrack = false;
 
     return result;
@@ -94,7 +96,6 @@ export function track(target: Object, key: keyof any) {
     depMap.set(key, effectSet);
   }
 
-  if (activiteEffect === undefined) return;
   effectSet.add(activiteEffect);
   // 反向依赖收集，用于 stop
   activiteEffect.deps.push(effectSet);
