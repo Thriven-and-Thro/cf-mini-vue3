@@ -97,4 +97,19 @@ describe("effect", () => {
     stop(runner);
     expect(onStop).toHaveBeenCalledTimes(1);
   });
+
+  it("stop meta", () => {
+    let dummy;
+    const user = reactive({
+      age: 0,
+    });
+    const runner = effect(() => {
+      dummy = user.age;
+    });
+    stop(runner);
+    // user.age = user.age+1
+    // get->set：所以会再次收集一次依赖
+    user.age++;
+    expect(dummy).toBe(0);
+  });
 });

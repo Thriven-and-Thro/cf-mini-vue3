@@ -2,6 +2,7 @@ import { extend } from "../shared";
 
 // 全局变量保存执行函数
 let activiteEffect: ActiviteEffect;
+let shouldTrack: boolean = true;
 
 // 封装执行函数
 class ActiviteEffect {
@@ -21,8 +22,19 @@ class ActiviteEffect {
   }
 
   run(): any {
+    // 防止++操作使stop失效
+    if (!this.active) {
+      return this._fn();
+    }
+
+    shouldTrack = true;
+
     activiteEffect = this;
-    return this._fn();
+    const result = this._fn();
+
+    shouldTrack = false;
+
+    return result;
   }
 
   stop() {
@@ -38,6 +50,7 @@ function cleanupEffect(effect: ActiviteEffect) {
   effect.deps.forEach((dep: Set<any>) => {
     dep.delete(effect);
   });
+  effect.deps.length = 0;
 }
 
 // 执行函数
@@ -66,6 +79,8 @@ type TargetMap = WeakMap<Object, DepMap>;
 const targetMap: TargetMap = new WeakMap();
 // 依赖收集
 export function track(target: Object, key: keyof any) {
+  if (!isTracking()) return;
+
   let depMap = targetMap.get(target);
   if (!depMap) {
     // 对象属性=》函数依赖
@@ -83,6 +98,11 @@ export function track(target: Object, key: keyof any) {
   effectSet.add(activiteEffect);
   // 反向依赖收集，用于 stop
   activiteEffect.deps.push(effectSet);
+}
+
+// 是否应该收集：防止重复收集
+function isTracking() {
+  return activiteEffect !== undefined && shouldTrack;
 }
 
 // 触发依赖
