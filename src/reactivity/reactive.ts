@@ -1,4 +1,8 @@
-import { mutableHandlers, readonlyHandlers } from "./baseHandlers";
+import {
+  mutableHandler,
+  readonlyHandler,
+  shallowReadonlyHandler,
+} from "./baseHandlers";
 
 export const enum ReactiveFlag {
   IS_REACTIVE = "__v_isReactive",
@@ -11,11 +15,15 @@ function createAvtiveObject(raw, baseHandlers) {
 }
 
 export function reactive<T extends Object>(target: T): T {
-  return createAvtiveObject(target, mutableHandlers);
+  return createAvtiveObject(target, mutableHandler);
 }
 
 export function readonly<T extends Object>(target: T): T {
-  return createAvtiveObject(target, readonlyHandlers);
+  return createAvtiveObject(target, readonlyHandler);
+}
+
+export function shallowReadonly<T extends Object>(target: T): T {
+  return createAvtiveObject(target, shallowReadonlyHandler);
 }
 
 // 通过读取值触发track操作来判断

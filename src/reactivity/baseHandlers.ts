@@ -1,4 +1,4 @@
-import { isObject } from "../shared";
+import { extend, isObject } from "../shared";
 import { track, trigger } from "./effect";
 import { reactive, ReactiveFlag, readonly } from "./reactive";
 
@@ -6,9 +6,10 @@ import { reactive, ReactiveFlag, readonly } from "./reactive";
 const get = createGetter();
 const set = createSetter();
 const readonlyGet = createGetter(true);
+const shallowReadonlyGet = createGetter(true, true);
 
 // 抽取：proxy的get操作
-function createGetter(isReadonly = false) {
+function createGetter(isReadonly = false, isShallow = false) {
   return (target, key, receiver) => {
     if (key === ReactiveFlag.IS_REACTIVE) {
       return !isReadonly;
@@ -16,6 +17,8 @@ function createGetter(isReadonly = false) {
       return isReadonly;
     }
     const res = Reflect.get(target, key, receiver);
+
+    if (isShallow) return res;
 
     // 嵌套对象的响应式处理
     if (isObject(res)) {
@@ -40,16 +43,20 @@ function createSetter() {
 }
 
 // 抽取：reactive的get、set操作
-export const mutableHandlers = {
+export const mutableHandler = {
   get,
   set,
 };
 
 // 抽取：readonly的get、set操作
-export const readonlyHandlers = {
+export const readonlyHandler = {
   get: readonlyGet,
   set: (target, key, value, receiver) => {
     console.warn(`readonly的值不能被修改 ${String(key)}-${value}`);
     return true;
   },
 };
+
+export const shallowReadonlyHandler = extend({}, readonlyHandler, {
+  get: shallowReadonlyGet,
+});
