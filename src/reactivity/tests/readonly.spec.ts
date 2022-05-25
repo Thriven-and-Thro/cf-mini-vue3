@@ -20,4 +20,11 @@ describe("readonly", () => {
     expect(isReadonly(userProxy)).toBe(true);
     expect(isReadonly(user)).toBe(false);
   });
+
+  it("deep readonly", () => {
+    const user = { age: 1, hobbies: [1, 2] };
+    const userProxy = readonly(user);
+    expect(isReadonly(userProxy)).toBe(true);
+    expect(isReadonly(userProxy.hobbies)).toBe(true);
+  });
 });

@@ -1,5 +1,6 @@
+import { isObject } from "../shared";
 import { track, trigger } from "./effect";
-import { ReactiveFlag } from "./reactive";
+import { reactive, ReactiveFlag, readonly } from "./reactive";
 
 // 优化：减少调用次数
 const get = createGetter();
@@ -15,8 +16,15 @@ function createGetter(isReadonly = false) {
       return isReadonly;
     }
     const res = Reflect.get(target, key, receiver);
+
+    // 嵌套对象的响应式处理
+    if (isObject(res)) {
+      return isReadonly ? readonly(res) : reactive(res);
+    }
+
     // 依赖收集
     if (!isReadonly) track(target, key);
+
     return res;
   };
 }
