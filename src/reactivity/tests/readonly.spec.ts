@@ -1,4 +1,4 @@
-import { isReadonly, readonly } from "../reactive";
+import { isProxy, isReadonly, readonly } from "../reactive";
 
 describe("readonly", () => {
   // 1. 不可写
@@ -14,11 +14,12 @@ describe("readonly", () => {
     expect(console.warn).toBeCalled();
   });
 
-  it("isReadonly", () => {
+  it("isReadonly isProxy", () => {
     const user = { age: 0 };
     const userProxy = readonly({ age: 0 });
     expect(isReadonly(userProxy)).toBe(true);
     expect(isReadonly(user)).toBe(false);
+    expect(isProxy(userProxy)).toBe(true);
   });
 
   it("deep readonly", () => {

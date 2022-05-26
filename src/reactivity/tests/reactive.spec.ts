@@ -1,4 +1,4 @@
-import { isReactive, reactive } from "../reactive";
+import { isProxy, isReactive, reactive } from "../reactive";
 
 // 分离
 describe("reactive", () => {
@@ -9,11 +9,12 @@ describe("reactive", () => {
     expect(userProxy.age).toBe(1);
   });
 
-  it("isReactive", () => {
+  it("isReactive isProxy", () => {
     const user = { age: 1 };
     const userProxy = reactive(user);
     expect(isReactive(userProxy)).toBe(true);
     expect(isReactive(user)).toBe(false);
+    expect(isProxy(userProxy)).toBe(true);
   });
 
   it("deep reactive", () => {
