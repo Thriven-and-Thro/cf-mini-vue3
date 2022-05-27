@@ -96,13 +96,18 @@ export function track(target: Object, key: keyof any) {
     depMap.set(key, effectSet);
   }
 
+  trackEffect(effectSet);
+}
+
+// 抽离功能，因为ref不需要以上依赖的数据结构
+export function trackEffect(effectSet: Set<any>) {
   effectSet.add(activiteEffect);
   // 反向依赖收集，用于 stop
   activiteEffect.deps.push(effectSet);
 }
 
 // 是否应该收集：防止重复收集
-function isTracking() {
+export function isTracking() {
   return activiteEffect !== undefined && shouldTrack;
 }
 
@@ -111,6 +116,11 @@ export function trigger(target: Object, key: keyof any) {
   let depMap = targetMap.get(target);
   let effectSet = depMap?.get(key);
 
+  triggerEffect(effectSet);
+}
+
+// 抽离功能，ref
+export function triggerEffect(effectSet) {
   if (effectSet) {
     for (const effect of effectSet) {
       if (effect.scheduler) {
