@@ -1,5 +1,6 @@
 import { effect } from "../effect";
-import { ref } from "../ref";
+import { reactive } from "../reactive";
+import { isRef, ref, unRef } from "../ref";
 
 describe("ref", () => {
   it("", () => {
@@ -31,5 +32,19 @@ describe("ref", () => {
     });
     user.value.name = "b";
     expect(newName).toBe("b");
+  });
+
+  it("isRef", () => {
+    const age = ref(1);
+    const user = reactive({ name: "a" });
+    expect(isRef(age)).toBe(true);
+    expect(isRef(1)).toBe(false);
+    expect(isRef(user)).toBe(false);
+  });
+
+  it("unRef", () => {
+    const age = ref(1);
+    expect(unRef(age)).toBe(1);
+    expect(unRef(1)).toBe(1);
   });
 });
