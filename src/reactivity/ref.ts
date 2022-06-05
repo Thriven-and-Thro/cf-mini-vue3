@@ -56,13 +56,15 @@ export function proxyRefs(objectWithRefs) {
   // 利用proxy
   return new Proxy(objectWithRefs, {
     get(target, key) {
-      // 通过 unRef 实现当有value时取value，没有时直接返回
+      // 通过 unRef 实现 当有value时取value，没有时直接返回
       return unRef(Reflect.get(target, key));
     },
     set(target, key, value) {
       if (isRef(target[key]) && !isRef(value)) {
+        // 特殊处理 赋值为ref对象
         return (target[key].value = value);
       } else {
+        // 其他情况 直接赋值
         return Reflect.set(target, key, value);
       }
     },
