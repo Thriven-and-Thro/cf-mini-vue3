@@ -6,17 +6,19 @@
 import { ActiviteEffect } from "./effect";
 
 class ComputedRefImpl {
-  private _dirty: boolean;
+  private _dirty: boolean = true;
   private _value: any;
   private _effect: ActiviteEffect;
 
-  constructor(getter) {
-    this._dirty = true;
+  constructor(getter: () => any) {
+    // 使用ActiviteEffect的目的是为了需要在触发依赖时做操作
     // 原本set之后应该触发依赖，但此处传入scheduler，故不会触发依赖，
     // 而是执行scheduler，在其中修改dirty取消缓存
     // 并且在下次get的时候通过run方法触发依赖更新值
     this._effect = new ActiviteEffect(getter, () => {
-      this._dirty = true;
+      if (!this._dirty) {
+        this._dirty = true;
+      }
     });
   }
 
@@ -31,6 +33,6 @@ class ComputedRefImpl {
   }
 }
 
-export function computed(getter) {
+export function computed(getter: () => any) {
   return new ComputedRefImpl(getter);
 }

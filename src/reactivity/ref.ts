@@ -52,7 +52,7 @@ export function unRef(ref: any) {
   return isRef(ref) ? ref.value : ref;
 }
 
-export function proxyRefs(objectWithRefs) {
+export function proxyRefs(objectWithRefs: any) {
   // 利用proxy
   return new Proxy(objectWithRefs, {
     get(target, key) {
