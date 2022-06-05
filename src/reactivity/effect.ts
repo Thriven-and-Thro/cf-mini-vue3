@@ -6,7 +6,7 @@ let activiteEffect: ActiviteEffect;
 let shouldTrack: boolean = true;
 
 // 封装执行函数
-class ActiviteEffect {
+export class ActiviteEffect {
   private _fn: () => any;
   // 适配器
   public scheduler?: () => any;
@@ -16,10 +16,11 @@ class ActiviteEffect {
   private onStop?: () => any;
 
   // 通过 public 暴露给外界使用
-  constructor(fn: () => any) {
+  constructor(fn: () => any, scheduler?: () => any) {
     this._fn = fn;
     this.deps = [];
     this.active = true;
+    this.scheduler = scheduler;
   }
 
   run(): any {
