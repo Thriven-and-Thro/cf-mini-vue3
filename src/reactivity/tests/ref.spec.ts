@@ -1,6 +1,6 @@
 import { effect } from "../effect";
 import { reactive } from "../reactive";
-import { isRef, ref, unRef } from "../ref";
+import { isRef, proxyRefs, ref, unRef } from "../ref";
 
 describe("ref", () => {
   it("", () => {
@@ -46,5 +46,25 @@ describe("ref", () => {
     const age = ref(1);
     expect(unRef(age)).toBe(1);
     expect(unRef(1)).toBe(1);
+  });
+
+  // template 中自动浅解包的实现
+  it("proxyRefs", () => {
+    const user = {
+      age: ref(10),
+      name: "cf",
+    };
+    const proxyUser = proxyRefs(user);
+    expect(user.age.value).toBe(10);
+    expect(proxyUser.age).toBe(10);
+    expect(proxyUser.name).toBe("cf");
+
+    proxyUser.age = 11;
+    expect(proxyUser.age).toBe(11);
+    expect(user.age.value).toBe(11);
+
+    proxyUser.age = ref(12);
+    expect(proxyUser.age).toBe(12);
+    expect(user.age.value).toBe(12);
   });
 });

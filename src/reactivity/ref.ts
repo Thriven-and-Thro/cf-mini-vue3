@@ -49,5 +49,22 @@ export function isRef(ref: any) {
 }
 
 export function unRef(ref: any) {
-  return isRef(ref) ? ref._value : ref;
+  return isRef(ref) ? ref.value : ref;
+}
+
+export function proxyRefs(objectWithRefs) {
+  // 利用proxy
+  return new Proxy(objectWithRefs, {
+    get(target, key) {
+      // 通过 unRef 实现当有value时取value，没有时直接返回
+      return unRef(Reflect.get(target, key));
+    },
+    set(target, key, value) {
+      if (isRef(target[key]) && !isRef(value)) {
+        return (target[key].value = value);
+      } else {
+        return Reflect.set(target, key, value);
+      }
+    },
+  });
 }
