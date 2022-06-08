@@ -1,2 +1,2 @@
 export { createApp } from "./createApp";
-export { render } from "./render";
+export { render as h, render } from "./render";

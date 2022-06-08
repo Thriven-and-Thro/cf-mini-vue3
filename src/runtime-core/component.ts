@@ -33,7 +33,7 @@ function handleSetupResult(instance, setupResult) {
 }
 
 function finishComponentSetup(instance) {
-  const component = instance.type;
+  const component = instance.vnode.type;
 
   // 将render函数挂载到实例上
   if (component.render) {
