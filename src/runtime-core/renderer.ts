@@ -1,4 +1,5 @@
 import { createComponentInstance, setupComponent } from "./component";
+import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 
 export function render(vnode, container) {
   patch(vnode, container);
@@ -27,7 +28,8 @@ function processComponent(vnode: any, container: any) {
 // init Element
 function mountElement(vnode, container) {
   // 1.创建
-  const el = document.createElement(vnode.type);
+  // 获取element的虚拟节点到vnode
+  const el = (vnode.el = document.createElement(vnode.type));
 
   // 2.处理
   const { props, children } = vnode;
@@ -57,17 +59,23 @@ function mountChildren(vnode, container) {
 }
 
 // init component
-function mountComponent(vnode, container) {
-  const instance = createComponentInstance(vnode);
+function mountComponent(initialVnode, container) {
+  const instance = createComponentInstance(initialVnode);
+
+  instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers);
 
   // 实例组件的处理
   setupComponent(instance);
 
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, container, initialVnode);
 }
 
-function setupRenderEffect(instance, container) {
-  const subTree = instance.render();
+function setupRenderEffect(instance, container, initialVnode) {
+  // 使使用的render中的this指向代理对象
+  const subTree = instance.render.call(instance.proxy);
 
   patch(subTree, container);
+
+  // 当所有子节点挂载完毕，获取该组件的虚拟节点
+  initialVnode.el = subTree.el;
 }
