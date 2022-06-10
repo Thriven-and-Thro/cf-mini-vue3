@@ -1,2 +1,2 @@
 export { createApp } from "./createApp";
-export { render as h, render } from "./render";
+export { createVNode as h } from "./vnode";

@@ -1,4 +1,4 @@
-import { render } from "./render";
+import { render } from "./renderer";
 import { createVNode } from "./vnode";
 
 // 传入根组件
