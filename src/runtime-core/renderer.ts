@@ -7,13 +7,13 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-  const { shapeFalge } = vnode;
+  const { shapeFlag } = vnode;
 
   // 1.element：type为string
   // 2.component：type为object有setup、render
-  if (shapeFalge & ShapeFlags.ELEMENT) {
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     processElement(vnode, container);
-  } else if (shapeFalge & ShapeFlags.STATEFUL_COMPONENT) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     processComponent(vnode, container);
   }
 }
@@ -35,7 +35,7 @@ function mountElement(vnode, container) {
   const el = (vnode.el = document.createElement(vnode.type));
 
   // 2.处理
-  const { props, children, shapeFalge } = vnode;
+  const { props, children, shapeFlag } = vnode;
 
   // props
   for (const key in props) {
@@ -44,9 +44,9 @@ function mountElement(vnode, container) {
 
   // children
   // 1.string 2.array
-  if (shapeFalge & ShapeFlags.TEXT_CHILDREN) {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
     el.textContent = children;
-  } else if (shapeFalge & ShapeFlags.ARRAY_CHILDREN) {
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     mountChildren(vnode, el);
   }
 

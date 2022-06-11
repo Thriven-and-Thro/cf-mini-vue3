@@ -7,13 +7,13 @@ export function createVNode(type, props?, children?) {
     children,
     el: null,
     // 节点类型
-    shapeFalge: getShapFlag(type),
+    shapeFlag: getShapFlag(type),
   };
 
   if (typeof children === "string") {
-    vnode.shapeFalge |= ShapeFlags.TEXT_CHILDREN;
+    vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   } else if (Array.isArray(children)) {
-    vnode.shapeFalge |= ShapeFlags.ARRAY_CHILDREN;
+    vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
   }
 
   return vnode;
