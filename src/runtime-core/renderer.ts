@@ -40,11 +40,13 @@ function mountElement(vnode, container) {
   // props
   for (const key in props) {
     const isOn = (key: string) => /^on[A-Z]/.test(key);
+
     if (isOn(key)) {
-      debugger;
+      // event
       const event = key.slice(2).toLocaleLowerCase();
       el.addEventListener(event, props[key]);
     } else {
+      // props
       el.setAttribute(key, props[key]);
     }
   }
