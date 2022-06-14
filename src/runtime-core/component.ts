@@ -1,3 +1,5 @@
+import { initProps } from "./componentProps";
+
 export function createComponentInstance(vnode) {
   const component: any = {
     vnode,
@@ -10,18 +12,13 @@ export function createComponentInstance(vnode) {
 }
 
 export function setupComponent(instance) {
+  debugger;
   // initProps
-  initProps(instance);
+  initProps(instance, instance.vnode.props);
   // initSolts
 
   // 无状态组件的处理
   setupStatefulComponent(instance);
-}
-
-function initProps(instance) {
-  const { props } = instance;
-  debugger;
-  handleSetupResult(instance, props);
 }
 
 function setupStatefulComponent(instance) {
@@ -30,7 +27,8 @@ function setupStatefulComponent(instance) {
   const { setup } = component;
 
   if (setup) {
-    const setupResult = setup();
+    // setup的props
+    const setupResult = setup(instance.props);
 
     handleSetupResult(instance, setupResult);
   }

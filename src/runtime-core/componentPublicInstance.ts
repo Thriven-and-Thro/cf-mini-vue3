@@ -9,6 +9,10 @@ export const PublicInstanceProxyHandlers = {
       return instance.setupState[key];
     }
 
+    if (key in instance.props) {
+      return instance.props[key];
+    }
+
     if (PublicPropertiesMap.has(key)) {
       return PublicPropertiesMap.get(key)?.(instance);
     }
