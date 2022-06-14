@@ -3,14 +3,25 @@ export function createComponentInstance(vnode) {
     vnode,
     type: vnode.type,
     setupState: {},
+    props: {},
   };
 
   return component;
 }
 
 export function setupComponent(instance) {
+  // initProps
+  initProps(instance);
+  // initSolts
+
   // 无状态组件的处理
   setupStatefulComponent(instance);
+}
+
+function initProps(instance) {
+  const { props } = instance;
+  debugger;
+  handleSetupResult(instance, props);
 }
 
 function setupStatefulComponent(instance) {

@@ -1,4 +1,5 @@
 import { h } from "../../lib/cf-mini-vue.esm.js";
+import { Foo } from "./Foo.js";
 
 // test init element
 // export const App = {
@@ -18,12 +19,13 @@ import { h } from "../../lib/cf-mini-vue.esm.js";
 //   },
 // };
 
-// test setupState $el event
+// test $el
 window.self = null;
 export const App = {
   render() {
     window.self = this;
     // ui
+    // test template
     return h("div", { class: "root", id: 0 }, [
       h(
         "p",
@@ -39,7 +41,9 @@ export const App = {
         },
         "hi"
       ),
+      // test setupState
       h("p", { class: "red", id: 2 }, this.msg),
+      h(Foo, { foo: 1 }),
     ]);
   },
 
