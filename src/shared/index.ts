@@ -6,3 +6,6 @@ export const isObject = (target: any): boolean => {
 
 export const hasChange = (value: any, newValue: any): boolean =>
   !Object.is(value, newValue);
+
+export const hasOwn = (val, key) =>
+  Object.prototype.hasOwnProperty.call(val, key);

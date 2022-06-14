@@ -1,3 +1,5 @@
+import { hasOwn } from "../shared/index";
+
 // 封装组件实例上的代理
 const PublicPropertiesMap = new Map<string, (args: any) => any>([
   ["$el", (i) => i.vnode.el],
@@ -5,11 +7,11 @@ const PublicPropertiesMap = new Map<string, (args: any) => any>([
 
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
-    if (key in instance.setupState) {
-      return instance.setupState[key];
-    }
+    const { setupState, props } = instance;
 
-    if (key in instance.props) {
+    if (hasOwn(setupState, key)) {
+      return instance.setupState[key];
+    } else if (hasOwn(props, key)) {
       return instance.props[key];
     }
 

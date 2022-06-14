@@ -1,3 +1,4 @@
+import { shallowReadonly } from "../reactivity/reactive";
 import { initProps } from "./componentProps";
 
 export function createComponentInstance(vnode) {
@@ -27,8 +28,8 @@ function setupStatefulComponent(instance) {
   const { setup } = component;
 
   if (setup) {
-    // setup的props
-    const setupResult = setup(instance.props);
+    // setup的props，需要只读
+    const setupResult = setup(shallowReadonly(instance.props));
 
     handleSetupResult(instance, setupResult);
   }
