@@ -43,14 +43,27 @@ export const App = {
       ),
       // test setupState
       h("p", { class: "red", id: 2 }, this.msg),
-      h(Foo, { foo: 1 }),
+      h(Foo, {
+        foo: 1,
+        onBtn: this.onBtn,
+        onOtherBtn: this.onOtherBtn,
+      }),
     ]);
   },
 
   setup() {
+    const onBtn = (a, b) => {
+      console.log("onBtn", a, b);
+    };
+    const onOtherBtn = (a, b) => {
+      console.log("onOtherBtn", a, b);
+    };
+
     // 逻辑
     return {
       msg: "mini-vue",
+      onBtn,
+      onOtherBtn,
     };
   },
 };

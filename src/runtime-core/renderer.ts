@@ -75,7 +75,6 @@ function mountComponent(initialVnode, container) {
   const instance = createComponentInstance(initialVnode);
 
   instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers);
-
   // 实例组件的处理
   setupComponent(instance);
 

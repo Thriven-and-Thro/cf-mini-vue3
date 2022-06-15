@@ -1,4 +1,5 @@
 import { shallowReadonly } from "../reactivity/reactive";
+import { initEmit } from "./componentEmit";
 import { initProps } from "./componentProps";
 
 export function createComponentInstance(vnode) {
@@ -7,16 +8,18 @@ export function createComponentInstance(vnode) {
     type: vnode.type,
     setupState: {},
     props: {},
+    emit: () => {},
   };
 
   return component;
 }
 
 export function setupComponent(instance) {
-  debugger;
   // initProps
   initProps(instance, instance.vnode.props);
   // initSolts
+
+  instance.emit = initEmit.bind(null, instance);
 
   // 无状态组件的处理
   setupStatefulComponent(instance);
@@ -29,7 +32,9 @@ function setupStatefulComponent(instance) {
 
   if (setup) {
     // setup的props，需要只读
-    const setupResult = setup(shallowReadonly(instance.props));
+    const setupResult = setup(shallowReadonly(instance.props), {
+      emit: instance.emit,
+    });
 
     handleSetupResult(instance, setupResult);
   }
