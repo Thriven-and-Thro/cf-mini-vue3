@@ -1,5 +1,5 @@
 import { shallowReadonly } from "../reactivity/reactive";
-import { initEmit } from "./componentEmit";
+import { emit } from "./componentEmit";
 import { initProps } from "./componentProps";
 
 export function createComponentInstance(vnode) {
@@ -11,6 +11,9 @@ export function createComponentInstance(vnode) {
     emit: () => {},
   };
 
+  // 使用bind为emit绑定第一个参数
+  component.emit = emit.bind(null, component);
+
   return component;
 }
 
@@ -18,8 +21,6 @@ export function setupComponent(instance) {
   // initProps
   initProps(instance, instance.vnode.props);
   // initSolts
-
-  instance.emit = initEmit.bind(null, instance);
 
   // 无状态组件的处理
   setupStatefulComponent(instance);

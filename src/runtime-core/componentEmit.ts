@@ -1,9 +1,10 @@
 import { camelize, toHandlerKey } from "../shared/index";
 
-export function initEmit(instance, event, ...args) {
+export function emit(instance, event, ...args) {
   // TPP
-  // 具体 -> 整体
+  // 具体 -> 通用
 
+  // other-btn => otherBtn => onOtherBtn
   const handlerName = toHandlerKey(camelize(event));
   const { props } = instance;
 
