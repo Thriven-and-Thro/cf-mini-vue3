@@ -24,6 +24,7 @@ window.self = null;
 export const App = {
   render() {
     window.self = this;
+
     // ui
     // test template
     return h("div", { class: "root", id: 0 }, [
@@ -43,6 +44,7 @@ export const App = {
       ),
       // test setupState
       h("p", { class: "red", id: 2 }, this.msg),
+      // test component, emit
       h(Foo, {
         foo: 1,
         onBtn: this.onBtn,

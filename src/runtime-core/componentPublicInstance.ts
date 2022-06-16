@@ -3,6 +3,7 @@ import { hasOwn } from "../shared/index";
 // 封装组件实例上的代理
 const PublicPropertiesMap = new Map<string, (args: any) => any>([
   ["$el", (i) => i.vnode.el],
+  ["$slots", (i) => i.slots],
 ]);
 
 export const PublicInstanceProxyHandlers = {

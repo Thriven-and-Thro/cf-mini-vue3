@@ -20,7 +20,7 @@ export const Foo = {
       {
         onClick: this.btn,
       },
-      "foo:" + this.foo
+      "foo:" + this.foo + this.$slots
     );
   },
 };
