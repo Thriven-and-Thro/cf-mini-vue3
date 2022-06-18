@@ -6,6 +6,7 @@ export function renderSlots(slots, name = "default", props = {}) {
 
   if (slot) {
     if (typeof slot === "function") {
+      // Fragment
       return createVNode(Fragment, {}, slot(props));
     }
   }

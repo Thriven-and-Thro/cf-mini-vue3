@@ -5,7 +5,7 @@ import { Foo1, Foo2 } from "./Foo.js";
 // 对象中的值为函数，且需返回节点
 
 // Fragment
-// createTextNode：因为children为数组时文本需要文本节点
+// createTextNode：因为children为数组时不能直接使用字符串，故文本需要文本节点
 export const App = {
   setup() {},
   render() {
