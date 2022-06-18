@@ -3,6 +3,8 @@ import { emit } from "./componentEmit";
 import { initProps } from "./componentProps";
 import { initSlots } from "./componentSlots";
 
+let currentInstacne = null;
+
 export function createComponentInstance(vnode) {
   const component: any = {
     vnode,
@@ -35,10 +37,14 @@ function setupStatefulComponent(instance) {
   const { setup } = component;
 
   if (setup) {
+    setCurrentInstance(instance);
+
     // setup的props，需要只读
     const setupResult = setup(shallowReadonly(instance.props), {
       emit: instance.emit,
     });
+
+    setCurrentInstance(null);
 
     handleSetupResult(instance, setupResult);
   }
@@ -60,4 +66,13 @@ function finishComponentSetup(instance) {
   if (component.render) {
     instance.render = component.render;
   }
+}
+
+export function getCurrentInstance() {
+  return currentInstacne;
+}
+
+// 将变更状态的操作封装，便于debug该操作的更改
+function setCurrentInstance(instance) {
+  currentInstacne = instance;
 }
