@@ -5,12 +5,14 @@ import { initSlots } from "./componentSlots";
 
 let currentInstacne = null;
 
-export function createComponentInstance(vnode) {
+export function createComponentInstance(vnode, parent) {
   const component: any = {
     vnode,
     type: vnode.type,
     setupState: {},
     props: {},
+    parent,
+    provides: parent.provides || {},
     slots: {},
     emit: () => {},
   };
