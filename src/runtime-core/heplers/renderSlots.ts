@@ -1,4 +1,4 @@
-import { createVNode } from "../vnode";
+import { createVNode, Fragment } from "../vnode";
 
 // 使用插槽函数：从$slots中取值
 export function renderSlots(slots, name = "default", props = {}) {
@@ -6,7 +6,7 @@ export function renderSlots(slots, name = "default", props = {}) {
 
   if (slot) {
     if (typeof slot === "function") {
-      return createVNode("div", {}, slot(props));
+      return createVNode(Fragment, {}, slot(props));
     }
   }
 }

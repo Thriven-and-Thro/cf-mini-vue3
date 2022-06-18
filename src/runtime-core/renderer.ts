@@ -1,6 +1,7 @@
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
+import { Fragment, Text } from "./vnode";
 
 export function render(vnode, container) {
   patch(vnode, container);
@@ -9,13 +10,35 @@ export function render(vnode, container) {
 function patch(vnode, container) {
   const { shapeFlag } = vnode;
 
-  // 1.element：type为string
-  // 2.component：type为object有setup、render
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    processElement(vnode, container);
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    processComponent(vnode, container);
+  switch (vnode.type) {
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    case Text:
+      processText(vnode, container);
+      break;
+    default:
+      // 1.element：type为string
+      // 2.component：type为object有setup、render
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        processElement(vnode, container);
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        processComponent(vnode, container);
+      }
+      break;
   }
+}
+
+// if Fragment
+function processFragment(vnode, container) {
+  mountChildren(vnode, container);
+}
+
+// if Text
+function processText(vnode, container) {
+  // 注意为vnode.el挂载
+  const textNode = (vnode.el = document.createTextNode(vnode.children));
+  container.append(textNode);
 }
 
 // if element

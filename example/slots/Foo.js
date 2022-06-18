@@ -7,7 +7,7 @@ export const Foo1 = {
   render() {
     console.log(this);
 
-    return h("p", {}, [
+    return h("div", {}, [
       renderSlots(this.$slots, "default", { age: 1 }),
       // 处理多子节点
       // renderSlots(this.$slots, "default"),
@@ -20,7 +20,7 @@ export const Foo2 = {
   render() {
     console.log(this);
 
-    return h("p", {}, [
+    return h("div", {}, [
       // 具名插槽
       h("div", {}, [
         renderSlots(this.$slots, "header"),
