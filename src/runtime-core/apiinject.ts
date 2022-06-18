@@ -19,7 +19,7 @@ export function provide(key, value) {
 
 // 注意：当前组件的provide在本组件是获取不到的
 // 参数2为默认值，可以为普通值或函数
-export function inject(key, defaultValue) {
+export function inject(key, defaultValue?) {
   const currentInstacne: any = getCurrentInstance();
 
   if (currentInstacne) {
