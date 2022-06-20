@@ -1,4 +1,4 @@
-import { hasChange, isObject } from "../shared";
+import { hasChange, isObject } from "../shared/index";
 import { isTracking, trackEffect, triggerEffect } from "./effect";
 import { reactive } from "./reactive";
 
@@ -52,6 +52,7 @@ export function unRef(ref: any) {
   return isRef(ref) ? ref.value : ref;
 }
 
+// 浅解包
 export function proxyRefs(objectWithRefs: any) {
   // 利用proxy
   return new Proxy(objectWithRefs, {

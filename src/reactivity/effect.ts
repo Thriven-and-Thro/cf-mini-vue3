@@ -1,4 +1,4 @@
-import { extend } from "../shared";
+import { extend } from "../shared/index";
 
 // 全局变量保存执行函数
 let activiteEffect: ActiviteEffect;
