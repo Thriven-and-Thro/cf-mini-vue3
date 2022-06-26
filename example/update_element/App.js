@@ -1,15 +1,24 @@
-import { h, ref, Fragment } from "../../lib/cf-mini-vue.esm.js";
+import { h, ref } from "../../lib/cf-mini-vue.esm.js";
 
 export const App = {
   render() {
-    return h(Fragment, {}, [
+    return h("div", {}, [
       h("p", {}, this.count),
-      h("button", { onClick: this.click }, "点点我"),
+      h(
+        "button",
+        {
+          onClick: this.click,
+        },
+        "点点我"
+      ),
     ]);
   },
+
   setup() {
     const count = ref(0);
-    const click = () => this.count++;
+    const click = () => {
+      count.value++;
+    };
 
     return {
       count,
