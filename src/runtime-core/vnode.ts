@@ -1,3 +1,4 @@
+import { isObject } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 
 export const Fragment = Symbol("Fragment");
@@ -13,7 +14,9 @@ export function createVNode(type, props?, children?) {
     shapeFlag: getShapFlag(type),
   };
 
-  if (typeof children === "string" || "number") {
+  // 坑：
+  // if (typeof children === "string" || "number") {
+  if (typeof children === "string" || typeof children === "number") {
     vnode.shapeFlag |= ShapeFlags.TEXT_CHILDREN;
   } else if (Array.isArray(children)) {
     vnode.shapeFlag |= ShapeFlags.ARRAY_CHILDREN;
@@ -21,7 +24,7 @@ export function createVNode(type, props?, children?) {
 
   // 插槽类型
   if (vnode.shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    if (typeof vnode.children === "object") {
+    if (isObject(vnode.children)) {
       vnode.shapeFlag |= ShapeFlags.SLOTS_CHILDREN;
     }
   }
