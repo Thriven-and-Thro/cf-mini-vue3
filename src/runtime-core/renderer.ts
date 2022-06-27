@@ -117,7 +117,7 @@ export function createRenderer(options) {
   function setupRenderEffect(instance, container, initialVnode) {
     // 使用effect对依赖进行收集
     effect(() => {
-      if (instance.isMount) {
+      if (instance.isMounted) {
         // 第一次渲染
         // 使使用的render中的this指向代理对象
         const subTree = (instance.subTree = instance.render.call(
@@ -129,7 +129,7 @@ export function createRenderer(options) {
         // 当所有子节点挂载完毕，获取该组件的虚拟节点
         initialVnode.el = subTree.el;
 
-        instance.isMount = false;
+        instance.isMounted = false;
       } else {
         // 更新
         const subTree = instance.render.call(instance.proxy);

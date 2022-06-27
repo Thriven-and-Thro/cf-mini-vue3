@@ -16,7 +16,7 @@ export function createComponentInstance(vnode, parent) {
     provides: parent.provides || {},
     slots: {},
     emit: () => {},
-    isMount: true,
+    isMounted: true,
     subTree: {},
   };
 
@@ -58,6 +58,7 @@ function setupStatefulComponent(instance) {
 function handleSetupResult(instance, setupResult) {
   // setup返回值的两种情况：对象、函数
   if (typeof setupResult === "object") {
+    // proxyRefs浅解包
     instance.setupState = proxyRefs(setupResult);
   }
 
