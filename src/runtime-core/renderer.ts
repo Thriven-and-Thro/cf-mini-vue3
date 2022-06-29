@@ -1,4 +1,5 @@
 import { effect } from "../reactivity/index";
+import { EMPTY_OBJECT } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
@@ -9,7 +10,7 @@ export function createRenderer(options) {
   // 重命名方便调试
   const {
     createElement: hostCreateElement,
-    patchProp: hostPatchProps,
+    patchProp: hostPatchProp,
     insert: hostInsert,
   } = options;
 
@@ -63,8 +64,44 @@ export function createRenderer(options) {
   }
 
   function patchElement(n1, n2, container) {
-    console.log("patchElement");
-    console.log(n1, n2);
+    console.log("patchElement", n1, n2);
+
+    // 带上默认值
+    // 使用EMPTY_OBJECT，是因为后续情况3的优化要根据同个对象进行判断
+    const oldProps = n1.props || EMPTY_OBJECT;
+    const newProps = n2.props || EMPTY_OBJECT;
+
+    // 此处 n2.el = n1.el 是因为n2不走mountElement，故其节点上el没有赋值
+    // 而后续n2需要比较则不能没有el
+    // 而且n2是替换n1的，是同一个节点所以el可以赋值
+    const el = (n2.el = n1.el);
+
+    // patch props
+    propsPatch(el, oldProps, newProps);
+  }
+
+  function propsPatch(el, oldProps, newProps) {
+    if (oldProps !== newProps) {
+      for (const key in newProps) {
+        const nextProp = newProps[key];
+        const prevProp = oldProps[key];
+
+        if (prevProp !== nextProp) {
+          // 情况1
+          hostPatchProp(el, key, prevProp, nextProp);
+        }
+      }
+
+      if (oldProps !== EMPTY_OBJECT) {
+        // 情况3
+        for (const key in oldProps) {
+          if (!(key in newProps)) {
+            // 手动让属性值为null，模拟情况2
+            hostPatchProp(el, key, oldProps[key], null);
+          }
+        }
+      }
+    }
   }
 
   // if component
@@ -82,7 +119,9 @@ export function createRenderer(options) {
     const { props, children, shapeFlag } = vnode;
 
     // props
-    hostPatchProps(el, props);
+    for (const key in props) {
+      hostPatchProp(el, key, null, props[key]);
+    }
 
     // children
     // 1.string 2.array
@@ -117,7 +156,7 @@ export function createRenderer(options) {
   function setupRenderEffect(instance, container, initialVnode) {
     // 使用effect对依赖进行收集
     effect(() => {
-      if (instance.isMounted) {
+      if (!instance.isMounted) {
         // 第一次渲染
         // 使使用的render中的this指向代理对象
         const subTree = (instance.subTree = instance.render.call(
@@ -129,15 +168,15 @@ export function createRenderer(options) {
         // 当所有子节点挂载完毕，获取该组件的虚拟节点
         initialVnode.el = subTree.el;
 
-        instance.isMounted = false;
+        instance.isMounted = true;
       } else {
         // 更新
         const subTree = instance.render.call(instance.proxy);
         const preSubTree = instance.subTree;
-        patch(preSubTree, subTree, container, instance);
-        initialVnode.el = subTree.el;
 
+        initialVnode.el = subTree.el;
         instance.subTree = subTree;
+        patch(preSubTree, subTree, container, instance);
       }
     });
   }

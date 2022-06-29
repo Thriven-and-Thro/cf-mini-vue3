@@ -6,18 +6,19 @@ function createElement(type) {
   return document.createElement(type);
 }
 
-function patchProp(el, props) {
-  for (const key in props) {
-    const isOn = (key: string) => /^on[A-Z]/.test(key);
+function patchProp(el, key, prevProp, nextProp) {
+  const isOn = (key: string) => /^on[A-Z]/.test(key);
 
-    if (isOn(key)) {
-      // event
-      const event = key.slice(2).toLocaleLowerCase();
-      el.addEventListener(event, props[key]);
-    } else {
-      // props
-      el.setAttribute(key, props[key]);
-    }
+  if (isOn(key)) {
+    // event
+    const event = key.slice(2).toLocaleLowerCase();
+    el.addEventListener(event, nextProp);
+  } else if (!nextProp) {
+    // props 为 undefined或null
+    el.removeAttribute(key);
+  } else {
+    // nextProp
+    el.setAttribute(key, nextProp);
   }
 }
 
