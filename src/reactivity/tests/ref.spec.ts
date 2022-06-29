@@ -68,3 +68,16 @@ describe("ref", () => {
     expect(user.age.value).toBe(12);
   });
 });
+
+it("patch props", () => {
+  const props = ref({
+    foo: "foo",
+    bar: "bar",
+  });
+  const log = jest.fn(() => {
+    console.log(props);
+  });
+  effect(log);
+  props.value.foo = "new-foo";
+  expect(log).toHaveBeenCalledTimes(1);
+});

@@ -56,17 +56,17 @@ export function unRef(ref: any) {
 export function proxyRefs(objectWithRefs: any) {
   // 利用proxy
   return new Proxy(objectWithRefs, {
-    get(target, key) {
+    get(target, key, receiver) {
       // 通过 unRef 实现 当有value时取value，没有时直接返回
-      return unRef(Reflect.get(target, key));
+      return unRef(Reflect.get(target, key, receiver));
     },
-    set(target, key, value) {
+    set(target, key, value, receiver) {
       if (isRef(target[key]) && !isRef(value)) {
         // 特殊处理 赋值为ref对象
         return (target[key].value = value);
       } else {
         // 其他情况 直接赋值
-        return Reflect.set(target, key, value);
+        return Reflect.set(target, key, value, receiver);
       }
     },
   });
