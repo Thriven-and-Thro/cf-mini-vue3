@@ -12,6 +12,8 @@ export function createRenderer(options) {
     createElement: hostCreateElement,
     patchProp: hostPatchProp,
     insert: hostInsert,
+    remove: hostRemove,
+    setElementText: hostSetElementText,
   } = options;
 
   function render(vnode, container, parentComponent) {
@@ -42,7 +44,7 @@ export function createRenderer(options) {
 
   // if Fragment
   function processFragment(n1, n2, container, parentComponent) {
-    mountChildren(n2, container, parentComponent);
+    mountChildren(n2.children, container, parentComponent);
   }
 
   // if Text
@@ -59,11 +61,11 @@ export function createRenderer(options) {
       mountElement(n2, container, parentComponent);
     } else {
       // patch tree
-      patchElement(n1, n2, container);
+      patchElement(n1, n2, container, parentComponent);
     }
   }
 
-  function patchElement(n1, n2, container) {
+  function patchElement(n1, n2, container, parentComponent) {
     console.log("patchElement", n1, n2);
 
     // 带上默认值
@@ -76,11 +78,44 @@ export function createRenderer(options) {
     // 而且n2是替换n1的，是同一个节点所以el可以赋值
     const el = (n2.el = n1.el);
 
+    // patch children
+    patchChildren(n1, n2, container, parentComponent);
+
     // patch props
-    propsPatch(el, oldProps, newProps);
+    patchProps(el, oldProps, newProps);
   }
 
-  function propsPatch(el, oldProps, newProps) {
+  function patchChildren(n1, n2, container, parentComponent) {
+    const prevShapFlag = n1.shapeFlag;
+    const c1 = n1.children;
+    const nextShapFlag = n2.shapeFlag;
+    const c2 = n2.children;
+
+    // to Text
+    if (nextShapFlag & ShapeFlags.TEXT_CHILDREN) {
+      //  Array
+      if (prevShapFlag & ShapeFlags.ARRAY_CHILDREN) {
+        unmountChildren(c1);
+      }
+      // Array/Text
+      if (c1 !== c2) {
+        hostSetElementText(container, c2);
+      }
+    } else {
+      if (prevShapFlag & ShapeFlags.TEXT_CHILDREN) {
+        hostSetElementText(container, "");
+        mountChildren(c2, container, parentComponent);
+      }
+    }
+  }
+
+  function unmountChildren(children) {
+    for (const child of children) {
+      hostRemove(child.el);
+    }
+  }
+
+  function patchProps(el, oldProps, newProps) {
     if (oldProps !== newProps) {
       for (const key in newProps) {
         const nextProp = newProps[key];
@@ -128,7 +163,7 @@ export function createRenderer(options) {
     if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
       el.textContent = children;
     } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
-      mountChildren(vnode, el, parentComponent);
+      mountChildren(vnode.children, el, parentComponent);
     }
 
     // 3.挂载
@@ -136,8 +171,8 @@ export function createRenderer(options) {
   }
 
   // 递归处理子节点
-  function mountChildren(vnode, container, parentComponent) {
-    for (const child of vnode.children) {
+  function mountChildren(children, container, parentComponent) {
+    for (const child of children) {
       patch(null, child, container, parentComponent);
     }
   }
