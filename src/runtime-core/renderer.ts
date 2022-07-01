@@ -101,7 +101,9 @@ export function createRenderer(options) {
       if (c1 !== c2) {
         hostSetElementText(container, c2);
       }
+      // to Array
     } else {
+      // Text
       if (prevShapFlag & ShapeFlags.TEXT_CHILDREN) {
         hostSetElementText(container, "");
         mountChildren(c2, container, parentComponent);

@@ -22,6 +22,7 @@ function patchProp(el, key, prevProp, nextProp) {
   }
 }
 
+// 此类对dom元素操作的也放入该文件
 function insert(el, parent) {
   parent.append(el);
 }

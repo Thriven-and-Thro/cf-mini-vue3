@@ -9,6 +9,7 @@ export const ArrayToText = {
   },
   setup() {
     let change = ref(true);
+    // 通过控制台除非更新
     window.change = change;
 
     return {
