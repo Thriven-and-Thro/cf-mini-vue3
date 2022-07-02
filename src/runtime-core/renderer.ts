@@ -79,7 +79,9 @@ export function createRenderer(options) {
     const el = (n2.el = n1.el);
 
     // patch children
-    patchChildren(n1, n2, container, parentComponent);
+    // 坑
+    // 此处container参数应该传el，否则子节点中的container依然是当前节点的
+    patchChildren(n1, n2, el, parentComponent, anchor);
 
     // patch props
     patchProps(el, oldProps, newProps);
