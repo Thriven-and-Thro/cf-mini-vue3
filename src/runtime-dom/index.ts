@@ -23,8 +23,10 @@ function patchProp(el, key, prevProp, nextProp) {
 }
 
 // 此类对dom元素操作的也放入该文件
-function insert(el, parent) {
-  parent.append(el);
+function insert(el, parent, anchor = null) {
+  // 重写
+  // parent.append(el);
+  parent.insertBefore(el, anchor);
 }
 
 function remove(child) {

@@ -1,4 +1,5 @@
 import { h } from "../../lib/cf-mini-vue.esm.js";
+import { ArrayToArray } from "./ArrayToArray.js";
 import { ArrayToText } from "./ArrayToText.js";
 import { TextToArray } from "./TextToArray.js";
 import { TextToText } from "./TextToText.js";
@@ -8,7 +9,8 @@ export const App = {
     return h("div", {}, [
       // h(ArrayToText),
       // h(TextToText),
-      h(TextToArray),
+      // h(TextToArray),
+      h(ArrayToArray),
     ]);
   },
   setup() {},
