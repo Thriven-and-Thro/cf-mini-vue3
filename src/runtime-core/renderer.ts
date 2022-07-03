@@ -413,7 +413,7 @@ export function createRenderer(options) {
   };
 }
 
-// 最长递增子序列
+// 最长递增子序列（不连续）
 function getSequence(arr: number[]): number[] {
   const p = arr.slice();
   const result = [0];
