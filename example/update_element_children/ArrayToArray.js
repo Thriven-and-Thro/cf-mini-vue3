@@ -20,15 +20,34 @@ import { h, ref } from "../../lib/cf-mini-vue.esm.js";
 //   h("div", { key: "c" }, "c"),
 // ]);
 
-// 右侧删除
-// a,b,c
+// // 右侧删除
+// // a,b,c
+// const A = h("div", {}, [
+//   h("div", { key: "a" }, "a"),
+//   h("div", { key: "b" }, "b"),
+//   h("div", { key: "c" }, "c"),
+// ]);
+// // b,c
+// const B = h("div", {}, [h("div", { key: "c" }, "c")]);
+
+// 中间删除
+// a,b,c,e,g,d
 const A = h("div", {}, [
   h("div", { key: "a" }, "a"),
   h("div", { key: "b" }, "b"),
   h("div", { key: "c" }, "c"),
+  h("div", { key: "e" }, "e"),
+  h("div", { key: "g" }, "g"),
+  h("div", { key: "d" }, "d"),
 ]);
-// b,c
-const B = h("div", {}, [h("div", { key: "c" }, "c")]);
+// a,b,e,f,d
+const B = h("div", {}, [
+  h("div", { key: "a" }, "a"),
+  h("div", { key: "b" }, "b"),
+  h("div", { key: "e" }, "e"),
+  h("div", { key: "f" }, "f"),
+  h("div", { key: "d" }, "d"),
+]);
 
 // // 右侧增加
 // // b,c
