@@ -84,13 +84,13 @@ export function createRenderer(options) {
     // 而且n2是替换n1的，是同一个节点所以el可以赋值
     const el = (n2.el = n1.el);
 
+    // patch props
+    patchProps(el, oldProps, newProps);
+
     // patch children
     // 坑
     // 此处container参数应该传el，否则子节点中的container依然是当前节点的
     patchChildren(n1, n2, el, parentComponent, anchor);
-
-    // patch props
-    patchProps(el, oldProps, newProps);
   }
 
   function patchChildren(n1, n2, container, parentComponent, anchor) {
@@ -194,7 +194,7 @@ export function createRenderer(options) {
         i++;
       }
     } else {
-      // 中间节点删除
+      // 中间节点
 
       const s1 = i,
         s2 = i,
@@ -202,9 +202,16 @@ export function createRenderer(options) {
         keyToNewIndexMap = new Map(),
         // 新增节点数
         toBePatched = e2 - s2 + 1;
-
       // 已查找的新增节点数
       let patched = 0;
+
+      // 旧的中间节点对于新的中间节点的映射
+      const newIndexToOldIndexMap = new Array(toBePatched);
+      // 初始化，0表示需要新增
+      for (let i = 0; i < toBePatched; i++) newIndexToOldIndexMap[i] = 0;
+
+      let moved = false,
+        maxNewIndexSoFar = 0;
 
       // 添加至映射
       for (let i = s2; i <= e2; i++) {
@@ -224,13 +231,12 @@ export function createRenderer(options) {
         }
 
         let newIndex;
-
         // 若旧节点有key，使用映射查找
         if (prevChild.key !== null) {
           newIndex = keyToNewIndexMap.get(prevChild.key);
           // 反之，遍历查找
         } else {
-          for (let j = s2; j < e2; j++) {
+          for (let j = s2; j <= e2; j++) {
             if (isSomeVNodeType(prevChild, c2[j])) {
               newIndex = j;
               break;
@@ -241,12 +247,47 @@ export function createRenderer(options) {
         // 旧节点中存在
         if (newIndex !== undefined) {
           patch(prevChild, c2[newIndex], container, parentComponent, null);
-          // 不存在
+          // 避开0
+          newIndexToOldIndexMap[newIndex - s2] = i + 1;
+          patched++;
+
+          // 优化点
+          // 当旧节点不是始终递增时，才将其标为true：需移位
+          if (newIndex >= maxNewIndexSoFar) {
+            maxNewIndexSoFar = newIndex;
+          } else {
+            moved = true;
+          }
+
+          // 不存在删除，该步骤处理掉新节点中不存在的旧节点
         } else {
           hostRemove(prevChild.el);
         }
+      }
 
-        patched++;
+      // 求出旧中间节点相对于新的最长递增子序列，使其不移位
+      const incressingNewIndexSequence = moved
+        ? getSequence(newIndexToOldIndexMap)
+        : [];
+
+      // 倒序
+      // 因为插入时需基于后一位，故后一位需先确定
+      let j = incressingNewIndexSequence.length - 1;
+      for (let i = toBePatched - 1; i >= 0; i--) {
+        const nextIndex = i + s2;
+        const nextChild = c2[nextIndex];
+        const anchor = nextIndex + 1 < l2 ? c2[nextIndex + 1].el : parentAnchor;
+
+        // 增加节点
+        if (newIndexToOldIndexMap[i] === 0) {
+          patch(null, nextChild, container, parentComponent, anchor);
+        } else if (moved) {
+          if (j < 0 || i !== incressingNewIndexSequence[j]) {
+            hostInsert(nextChild.el, container, anchor);
+          } else {
+            j--;
+          }
+        }
       }
     }
   }
@@ -370,4 +411,46 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render),
   };
+}
+
+// 最长递增子序列
+function getSequence(arr: number[]): number[] {
+  const p = arr.slice();
+  const result = [0];
+  let i, j, u, v, c;
+  const len = arr.length;
+  for (i = 0; i < len; i++) {
+    const arrI = arr[i];
+    if (arrI !== 0) {
+      j = result[result.length - 1];
+      if (arr[j] < arrI) {
+        p[i] = j;
+        result.push(i);
+        continue;
+      }
+      u = 0;
+      v = result.length - 1;
+      while (u < v) {
+        c = (u + v) >> 1;
+        if (arr[result[c]] < arrI) {
+          u = c + 1;
+        } else {
+          v = c;
+        }
+      }
+      if (arrI < arr[result[u]]) {
+        if (u > 0) {
+          p[i] = result[u - 1];
+        }
+        result[u] = i;
+      }
+    }
+  }
+  u = result.length;
+  v = result[u - 1];
+  while (u-- > 0) {
+    result[u] = v;
+    v = p[v];
+  }
+  return result;
 }
