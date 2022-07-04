@@ -4,6 +4,7 @@ import { hasOwn } from "../shared/index";
 const PublicPropertiesMap = new Map<string, (args: any) => any>([
   ["$el", (i) => i.vnode.el],
   ["$slots", (i) => i.slots],
+  ["$props", (i) => i.props],
 ]);
 
 export const PublicInstanceProxyHandlers = {
