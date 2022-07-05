@@ -18,6 +18,7 @@ export function createComponentInstance(vnode, parent) {
     emit: () => {},
     isMounted: false,
     subTree: {},
+    next: null,
   };
 
   // 使用bind为emit绑定第一个参数

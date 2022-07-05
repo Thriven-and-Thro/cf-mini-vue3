@@ -13,6 +13,7 @@ export function createVNode(type, props?, children?) {
     el: null,
     // 节点类型
     shapeFlag: getShapFlag(type),
+    component: null,
   };
 
   // 坑：

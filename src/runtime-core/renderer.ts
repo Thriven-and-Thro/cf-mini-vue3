@@ -3,6 +3,7 @@ import { EMPTY_OBJECT } from "../shared/index";
 import { ShapeFlags } from "../shared/ShapeFlags";
 import { createComponentInstance, setupComponent } from "./component";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
+import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
 import { Fragment, Text } from "./vnode";
 
@@ -330,7 +331,23 @@ export function createRenderer(options) {
     parentComponent,
     anchor
   ) {
-    mountComponent(n2, container, parentComponent, anchor);
+    if (!n1) {
+      mountComponent(n2, container, parentComponent, anchor);
+    } else {
+      patchComponent(n1, n2);
+    }
+  }
+
+  function patchComponent(n1, n2) {
+    // 保存n2节点上的属性
+    const instance = (n2.component = n1.component);
+    if (shouldUpdateComponent(n1, n2)) {
+      instance.next = n2;
+      instance.update();
+    } else {
+      n2.el = n1.el;
+      instance.vnode = n2;
+    }
   }
 
   // init Element
@@ -368,7 +385,11 @@ export function createRenderer(options) {
 
   // init component
   function mountComponent(initialVnode, container, parentComponent, anchor) {
-    const instance = createComponentInstance(initialVnode, parentComponent);
+    // 将组件实例挂载到vnode，使可以通过vnode取组件实例
+    const instance = (initialVnode.component = createComponentInstance(
+      initialVnode,
+      parentComponent
+    ));
 
     instance.proxy = new Proxy({ _: instance }, PublicInstanceProxyHandlers);
     // 实例组件的处理
@@ -379,7 +400,8 @@ export function createRenderer(options) {
 
   function setupRenderEffect(instance, container, initialVnode, anchor) {
     // 使用effect对依赖进行收集
-    effect(() => {
+    // 利用effect返回runner函数，将其挂载到instance上，使可调用update重新执行effect进行更新
+    instance.update = effect(() => {
       if (!instance.isMounted) {
         // 第一次渲染
         // 使使用的render中的this指向代理对象
@@ -395,11 +417,19 @@ export function createRenderer(options) {
         instance.isMounted = true;
       } else {
         // 更新
+
+        // 组件
+        const { next, vnode } = instance;
+        if (next) {
+          // 保存n2节点上的属性
+          next.el = vnode.el;
+          updateComponentPreRender(instance, next);
+        }
+
         const subTree = instance.render.call(instance.proxy);
         const preSubTree = instance.subTree;
 
         initialVnode.el = subTree.el;
-        instance.subTree = subTree;
         patch(preSubTree, subTree, container, instance, anchor);
       }
     });
@@ -411,6 +441,15 @@ export function createRenderer(options) {
   return {
     createApp: createAppAPI(render),
   };
+}
+
+function updateComponentPreRender(instance, nextVNode) {
+  // 保存n2节点上的属性
+  nextVNode.component = instance;
+  instance.vnode = nextVNode;
+  nextVNode.next = null;
+  // 转移props
+  instance.props = nextVNode.props;
 }
 
 // 最长递增子序列（不连续）
