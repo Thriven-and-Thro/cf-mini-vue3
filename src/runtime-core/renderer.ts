@@ -345,6 +345,7 @@ export function createRenderer(options) {
       instance.next = n2;
       instance.update();
     } else {
+      // 虽然不需要调用更新，但需要保存n2节点上的属性
       n2.el = n1.el;
       instance.vnode = n2;
     }
