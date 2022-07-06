@@ -5,6 +5,7 @@ import { createComponentInstance, setupComponent } from "./component";
 import { PublicInstanceProxyHandlers } from "./componentPublicInstance";
 import { shouldUpdateComponent } from "./componentUpdateUtils";
 import { createAppAPI } from "./createApp";
+import { queueJobs } from "./scheduler";
 import { Fragment, Text } from "./vnode";
 
 export function createRenderer(options) {
@@ -402,38 +403,47 @@ export function createRenderer(options) {
   function setupRenderEffect(instance, container, initialVnode, anchor) {
     // 使用effect对依赖进行收集
     // 利用effect返回runner函数，将其挂载到instance上，使可调用update重新执行effect进行更新
-    instance.update = effect(() => {
-      if (!instance.isMounted) {
-        // 第一次渲染
-        // 使使用的render中的this指向代理对象
-        const subTree = (instance.subTree = instance.render.call(
-          instance.proxy
-        ));
+    instance.update = effect(
+      () => {
+        if (!instance.isMounted) {
+          // 第一次渲染
+          // 使使用的render中的this指向代理对象
+          const subTree = (instance.subTree = instance.render.call(
+            instance.proxy
+          ));
 
-        patch(null, subTree, container, instance, null);
+          patch(null, subTree, container, instance, null);
 
-        // 当所有子节点挂载完毕，获取该组件的虚拟节点
-        initialVnode.el = subTree.el;
+          // 当所有子节点挂载完毕，获取该组件的虚拟节点
+          initialVnode.el = subTree.el;
 
-        instance.isMounted = true;
-      } else {
-        // 更新
+          instance.isMounted = true;
+        } else {
+          // 更新
 
-        // 组件
-        const { next, vnode } = instance;
-        if (next) {
-          // 保存n2节点上的属性
-          next.el = vnode.el;
-          updateComponentPreRender(instance, next);
+          // 组件
+          const { next, vnode } = instance;
+          if (next) {
+            // 保存n2节点上的属性
+            next.el = vnode.el;
+            updateComponentPreRender(instance, next);
+          }
+
+          const subTree = instance.render.call(instance.proxy);
+          const preSubTree = instance.subTree;
+
+          initialVnode.el = subTree.el;
+          patch(preSubTree, subTree, container, instance, anchor);
         }
-
-        const subTree = instance.render.call(instance.proxy);
-        const preSubTree = instance.subTree;
-
-        initialVnode.el = subTree.el;
-        patch(preSubTree, subTree, container, instance, anchor);
+      },
+      {
+        scheduler() {
+          console.log("update scheduler");
+          // 将更新放入异步
+          queueJobs(instance.update);
+        },
       }
-    });
+    );
   }
 
   // 将createApp函数过载在renderer对象上
