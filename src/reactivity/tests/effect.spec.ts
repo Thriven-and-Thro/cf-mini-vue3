@@ -114,5 +114,25 @@ describe("effect", () => {
     stop(runner);
     user.age++;
     expect(dummy).toBe(1);
+
+    runner();
+    expect(dummy).toBe(2);
+  });
+
+  it("分支处理", () => {
+    const obj1 = reactive({ num: 1 }),
+      obj2 = reactive({ num: 2 });
+
+    const fn = jest.fn(() => {
+      obj1.num === 1 ? obj2.num : false;
+    });
+    effect(fn);
+
+    obj1.num++;
+    expect(fn).toHaveBeenCalledTimes(2);
+    // 此时obj1.num!==1
+    // 应该走false的分支，所以读取obj2.num理应不触发依赖
+    obj2.num++;
+    expect(fn).toHaveBeenCalledTimes(2);
   });
 });

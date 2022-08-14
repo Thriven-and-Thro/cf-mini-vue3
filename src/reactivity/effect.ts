@@ -1,17 +1,21 @@
 import { extend } from "../shared/index";
 
+type Dep = Set<ReactiveEffect>;
+type DepMap = Map<unknown, Dep>;
+type TargetMap = WeakMap<Object, DepMap>;
+
 // 全局变量保存执行函数
-let activiteEffect: ActiviteEffect;
+let activiteEffect: ReactiveEffect | undefined;
 // 防止重复get进行依赖收集
 let shouldTrack: boolean = true;
 
 // 封装执行函数
-export class ActiviteEffect {
+export class ReactiveEffect {
   private _fn: () => any;
   // 适配器
   public scheduler?: () => any;
   // 反向依赖收集
-  public deps: any[];
+  public deps: Dep[];
   private active: boolean;
   private onStop?: () => any;
 
@@ -32,6 +36,7 @@ export class ActiviteEffect {
     shouldTrack = true;
 
     activiteEffect = this;
+    cleanupEffect(activiteEffect);
     const result = this._fn();
 
     // 上锁
@@ -49,8 +54,8 @@ export class ActiviteEffect {
   }
 }
 
-function cleanupEffect(effect: ActiviteEffect) {
-  effect.deps.forEach((dep: Set<any>) => {
+function cleanupEffect(effect: ReactiveEffect) {
+  effect.deps.forEach((dep) => {
     dep.delete(effect);
   });
   effect.deps.length = 0;
@@ -58,13 +63,13 @@ function cleanupEffect(effect: ActiviteEffect) {
 
 // 执行函数
 export function effect(fn: () => any, option: any = {}): () => any {
-  const activiteFn = new ActiviteEffect(fn);
+  const activiteFn = new ReactiveEffect(fn);
   // 将Object.assign别名为extend，提高可读性
   extend(activiteFn, option);
   activiteFn.run();
 
   const runner: any = activiteFn.run.bind(activiteFn);
-  // 将ActiviteEffect实例挂载到runner上，便于stop函数取到实例
+  // 将ReactiveEffect实例挂载到runner上，便于stop函数取到实例
   runner.effect = activiteFn;
 
   return runner;
@@ -75,15 +80,10 @@ export function stop(runner) {
   runner.effect.stop();
 }
 
-type DepMap = Map<keyof any, Set<any>>;
-type TargetMap = WeakMap<Object, DepMap>;
-
 // proxy对象=》对象map
 const targetMap: TargetMap = new WeakMap();
 // 依赖收集
-export function track(target: Object, key: keyof any) {
-  if (!isTracking()) return;
-
+export function track(target: object, key: unknown) {
   let depMap = targetMap.get(target);
   if (!depMap) {
     // 对象属性=》函数依赖
@@ -101,10 +101,12 @@ export function track(target: Object, key: keyof any) {
 }
 
 // 抽离功能，因为ref不需要以上依赖的数据结构
-export function trackEffect(effectSet: Set<any>) {
-  effectSet.add(activiteEffect);
-  // 反向依赖收集，用于 stop
-  activiteEffect.deps.push(effectSet);
+export function trackEffect(effectSet: Dep) {
+  if (isTracking()) {
+    effectSet.add(activiteEffect!);
+    // 反向依赖收集，用于 stop
+    activiteEffect?.deps.push(effectSet);
+  }
 }
 
 // 是否应该收集：防止重复收集
@@ -121,9 +123,16 @@ export function trigger(target: Object, key: keyof any) {
 }
 
 // 抽离功能，ref
-export function triggerEffect(effectSet) {
+export function triggerEffect(effectSet: Dep | undefined) {
   if (effectSet) {
-    for (const effect of effectSet) {
+    // 转换为数组，因为遍历时一边增肌一边删除会造成无限循环
+    const effects: ReactiveEffect[] = [];
+    for (const dep of effectSet) {
+      if (dep) {
+        effects.push(dep);
+      }
+    }
+    for (const effect of effects) {
       if (effect.scheduler) {
         effect.scheduler();
       } else {
